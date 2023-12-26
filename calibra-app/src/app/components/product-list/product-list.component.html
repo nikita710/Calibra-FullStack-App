@@ -7,19 +7,32 @@
       <div class="row">
         <!-- loop over the products list from api -->
         <div class="col-md-3" *ngFor="let product of productList">
-          <div class="card">
-            <img
-              src="{{ product.imageUrl }}"
-              class="card-img-top image-responsive"
-              alt="product"
-            />
+          <div class="card mb-3">
+            <a routerLink="/product-details/{{ product.id }}">
+              <img
+                src="{{ product.imageUrl }}"
+                class="card-img-top image-responsive"
+                alt="product"
+              />
+            </a>
+
             <div class="card-body">
-              <h5 class="card-title">{{ product.name }}</h5>
+              <h5 class="card-title">
+                <a routerLink="/product-details/{{ product.id }}">
+                  {{ product.name }}
+                </a>
+              </h5>
               <p class="card-text">
                 <span>Price</span> {{ product.unitPrice | currency : "INR" }},
                 &nbsp; <span>In Stock</span> {{ product.unitsInStock }}
               </p>
-              <a href="#" class="btn btn-primary">Add To Cart</a>
+              <button
+                (click)="handleAddToCart(product)"
+                type="button"
+                class="btn btn-primary"
+              >
+                Add To Cart
+              </button>
             </div>
           </div>
         </div>
@@ -31,6 +44,41 @@
           role="alert"
         >
           No products found.
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div class="footer-pagination">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="d-flex justify-content-end justify-content-between">
+              <div>
+                <ngb-pagination
+                  [(page)]="thePageNumber"
+                  [pageSize]="thePageSize"
+                  [collectionSize]="theTotalElements"
+                  (pageChange)="listProducts()"
+                  [maxSize]="5"
+                  [boundaryLinks]="true"
+                />
+              </div>
+
+              <div>
+                <span class="mx-2">Page Size</span>
+                <select
+                  class="form-select form-select-sm"
+                  #selectPageSize
+                  (change)="updatePageSize(selectPageSize.value)"
+                >
+                  <option>2</option>
+                  <option selected="true">10</option>
+                  <option>20</option>
+                  <option>30</option>
+                  <option>40</option>
+                  <option>50</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

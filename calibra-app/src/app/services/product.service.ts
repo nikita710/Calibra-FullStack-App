@@ -8,38 +8,73 @@ import { ProductCategory } from '../common/product-category';
   providedIn: 'root',
 })
 export class ProductService {
-  private baseUrl = 'http://localhost:8585/products';
-  private categoryUrl = 'http://localhost:8585/product-category';
+  private baseUrl = 'http://localhost:8585/api/products';
+  private categoryUrl = 'http://localhost:8585/api/product-category';
 
   constructor(private http: HttpClient) {}
 
-  getProductList(currentCategoryId: number): Observable<Product[]> {
-    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${currentCategoryId}`;
-
-    return this.getProducts(searchUrl);
+  // get all products with pagination
+  getProductListPaginate(
+    currentCategoryId: number,
+    thePage: number,
+    thePageSize: number
+  ): Observable<GetResponseProducts> {
+    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${currentCategoryId}&page=${thePage}&size=${thePageSize}`;
+    return this.http.get<GetResponseProducts>(searchUrl);
   }
 
-  getProductCategories(): Observable<ProductCategory[]> {
-    return this.http
-      .get<GetResponseProductCategory>(this.categoryUrl)
-      .pipe(map((response) => response._embedded.productCategory));
+  // get search y keyword products with pagination
+  getSearchedProductListPaginate(
+    keyword: string,
+    thePage: number,
+    thePageSize: number
+  ): Observable<GetResponseProducts> {
+    const searchUrl = `${this.baseUrl}/search/findByNameContaining?name=${keyword}&page=${thePage}&size=${thePageSize}`;
+    return this.http.get<GetResponseProducts>(searchUrl);
   }
 
+  // get products by search keyword
   searchProducts(keyword: string): Observable<Product[]> {
     const searchUrl = `${this.baseUrl}/search/findByNameContaining?name=${keyword}`;
     return this.getProducts(searchUrl);
   }
 
+  // get products by category id
+  getProductList(currentCategoryId: number): Observable<Product[]> {
+    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${currentCategoryId}`;
+    return this.getProducts(searchUrl);
+  }
+
+  // get single product by id
+  getProductById(productId: number): Observable<Product> {
+    const urlId = `${this.baseUrl}/${productId}`;
+    return this.http.get<Product>(urlId);
+  }
+
+  // helper function for different search url
   private getProducts(searchUrl: string): Observable<Product[]> {
     return this.http
       .get<GetResponseProducts>(searchUrl)
       .pipe(map((response) => response._embedded.products));
+  }
+
+  // get all categories
+  getProductCategories(): Observable<ProductCategory[]> {
+    return this.http
+      .get<GetResponseProductCategory>(this.categoryUrl)
+      .pipe(map((response) => response._embedded.productCategory));
   }
 }
 
 interface GetResponseProducts {
   _embedded: {
     products: Product[];
+  };
+  page: {
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    number: number;
   };
 }
 

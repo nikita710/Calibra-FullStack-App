@@ -1,7 +1,9 @@
 package com.techbeyond.calibraapi.config;
 
+import com.techbeyond.calibraapi.entity.Country;
 import com.techbeyond.calibraapi.entity.Product;
 import com.techbeyond.calibraapi.entity.ProductCategory;
+import com.techbeyond.calibraapi.entity.State;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.springframework.context.annotation.Configuration;
@@ -22,20 +24,24 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         this.entityManager = entityManager;
     }
 
+    //disable HTTP methods for ProductCategory: POST, PUT, DELETE
+    private static void disableHttpMethod(Class domainClass, RepositoryRestConfiguration config, HttpMethod[] theUnsupportedAction) {
+
+        config.getExposureConfiguration().forDomainType(domainClass)
+                .withItemExposure(((metdata, httpMethods) -> httpMethods.disable(theUnsupportedAction)))
+                .withAssociationExposure(((metdata, httpMethods) -> httpMethods.disable(theUnsupportedAction)));
+    }
+
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         RepositoryRestConfigurer.super.configureRepositoryRestConfiguration(config, cors);
         HttpMethod[] theUnsupportedAction = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE};
 
-        //disable HTTP methods for Product: POST, PUT, DELETE
-        config.getExposureConfiguration().forDomainType(Product.class)
-                .withItemExposure(((metdata, httpMethods) -> httpMethods.disable(theUnsupportedAction)))
-                .withAssociationExposure(((metdata, httpMethods) -> httpMethods.disable(theUnsupportedAction)));
-
         //disable HTTP methods for ProductCategory: POST, PUT, DELETE
-        config.getExposureConfiguration().forDomainType(ProductCategory.class)
-                .withItemExposure(((metdata, httpMethods) -> httpMethods.disable(theUnsupportedAction)))
-                .withAssociationExposure(((metdata, httpMethods) -> httpMethods.disable(theUnsupportedAction)));
+        disableHttpMethod(Product.class, config, theUnsupportedAction);
+        disableHttpMethod(ProductCategory.class, config, theUnsupportedAction);
+        disableHttpMethod(Country.class, config, theUnsupportedAction);
+        disableHttpMethod(State.class, config, theUnsupportedAction);
 
         exposeIds(config);
     }
@@ -50,7 +56,7 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         for (EntityType entityType : entities) {
             entityClasses.add(entityType.getJavaType());
         }
-//- expose the entity ids for the array of entity/domain types
+        //- expose the entity ids for the array of entity/domain types
         Class[] domainTypes = entityClasses.toArray(new Class[0]);
         config.exposeIdsFor(domainTypes);
 
