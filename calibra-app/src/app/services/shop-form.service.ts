@@ -3,12 +3,13 @@ import { Observable, map, of } from 'rxjs';
 import { Country } from '../common/country';
 import { HttpClient } from '@angular/common/http';
 import { State } from '../common/state';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ShopFormService {
-  private baseUrl = 'http://localhost:8585/api';
+  private baseUrl = environment.baseUrl;
 
   constructor(private httpClient: HttpClient) {}
 
