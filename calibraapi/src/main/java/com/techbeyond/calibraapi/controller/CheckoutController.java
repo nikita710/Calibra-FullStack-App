@@ -10,11 +10,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.logging.Logger;
+
 @CrossOrigin("http://localhost:4200")
 @RestController
 @RequestMapping("/api/checkout")
 public class CheckoutController {
     private final CheckoutService checkoutService;
+
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
     public CheckoutController(CheckoutService checkoutService) {
         this.checkoutService = checkoutService;
@@ -28,6 +32,8 @@ public class CheckoutController {
 
     @PostMapping("/payment-intent")
     public ResponseEntity<String> createPaymentIntent(@RequestBody PaymentInfo paymentInfo) throws StripeException {
+        logger.info("PaymentInfo: " + paymentInfo.getAmount());
+
         PaymentIntent paymentIntent = checkoutService.createPaymentIntent(paymentInfo);
         String paymentStr = paymentIntent.toJson();
 
